@@ -2,8 +2,9 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Copy, RefreshCw, Type, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 interface AIResultsProps {
   title: string;
@@ -15,7 +16,27 @@ interface AIResultsProps {
 export const AIResults = ({ title, summary, isGenerating, onRegenerate }: AIResultsProps) => {
   const [copiedTitle, setCopiedTitle] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const { toast } = useToast();
+
+  // Typewriter effects
+  const titleTypewriter = useTypewriter({ 
+    text: title, 
+    speed: 30, 
+    delay: 500,
+    onComplete: () => setShowSummary(true)
+  });
+  
+  const summaryTypewriter = useTypewriter({ 
+    text: summary, 
+    speed: 15, 
+    delay: showSummary ? 300 : 0
+  });
+
+  // Reset summary visibility when new results come in
+  useEffect(() => {
+    setShowSummary(false);
+  }, [title, summary]);
 
   const copyToClipboard = async (text: string, type: 'title' | 'summary') => {
     try {
@@ -79,6 +100,7 @@ export const AIResults = ({ title, summary, isGenerating, onRegenerate }: AIResu
                 size="sm"
                 onClick={() => copyToClipboard(title, 'title')}
                 className="border-border/50 hover:bg-accent/50"
+                disabled={!titleTypewriter.isComplete}
               >
                 <Copy className="h-4 w-4" />
                 {copiedTitle ? 'Copied!' : 'Copy'}
@@ -86,49 +108,59 @@ export const AIResults = ({ title, summary, isGenerating, onRegenerate }: AIResu
             </div>
           </div>
           
-          <div className="bg-accent/20 rounded-lg p-4 border border-accent/30">
+          <div className="bg-accent/20 rounded-lg p-4 border border-accent/30 min-h-[60px] flex items-center">
             <p className="text-foreground font-medium text-lg leading-relaxed">
-              {title}
+              {titleTypewriter.displayText}
+              {titleTypewriter.isStarted && !titleTypewriter.isComplete && (
+                <span className="animate-pulse text-primary">|</span>
+              )}
             </p>
           </div>
         </div>
       </Card>
 
       {/* Generated Summary */}
-      <Card className="bg-gradient-card backdrop-blur-sm border-border/50">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold text-foreground">AI Generated Summary</h3>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                <Sparkles className="h-3 w-3 mr-1" />
-                AI
-              </Badge>
+      {showSummary && (
+        <Card className="bg-gradient-card backdrop-blur-sm border-border/50 animate-fade-in">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">AI Generated Summary</h3>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  AI
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(summary, 'summary')}
+                  className="border-border/50 hover:bg-accent/50"
+                  disabled={!summaryTypewriter.isComplete}
+                >
+                  <Copy className="h-4 w-4" />
+                  {copiedSummary ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyToClipboard(summary, 'summary')}
-                className="border-border/50 hover:bg-accent/50"
-              >
-                <Copy className="h-4 w-4" />
-                {copiedSummary ? 'Copied!' : 'Copy'}
-              </Button>
+            
+            <div className="bg-accent/20 rounded-lg p-4 border border-accent/30 min-h-[120px]">
+              <p className="text-foreground leading-relaxed whitespace-pre-line">
+                {summaryTypewriter.displayText}
+                {summaryTypewriter.isStarted && !summaryTypewriter.isComplete && (
+                  <span className="animate-pulse text-primary">|</span>
+                )}
+              </p>
             </div>
           </div>
-          
-          <div className="bg-accent/20 rounded-lg p-4 border border-accent/30">
-            <p className="text-foreground leading-relaxed whitespace-pre-line">
-              {summary}
-            </p>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Regenerate Button */}
-      <Card className="bg-gradient-card backdrop-blur-sm border-border/50">
+      {summaryTypewriter.isComplete && (
+        <Card className="bg-gradient-card backdrop-blur-sm border-border/50 animate-fade-in">
         <div className="p-4 text-center">
           <Button
             onClick={onRegenerate}
@@ -138,8 +170,9 @@ export const AIResults = ({ title, summary, isGenerating, onRegenerate }: AIResu
             <RefreshCw className="h-4 w-4 mr-2" />
             Regenerate with AI
           </Button>
-        </div>
-      </Card>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
