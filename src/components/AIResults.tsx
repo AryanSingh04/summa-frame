@@ -20,12 +20,19 @@ export const AIResults = ({ title, summary, isGenerating, onRegenerate }: AIResu
   const { toast } = useToast();
 
   // Typewriter effects
+  console.log('AIResults render:', { title, summary, isGenerating });
+  
   const titleTypewriter = useTypewriter({ 
     text: title, 
     speed: 30, 
     delay: 500,
-    onComplete: () => setShowSummary(true)
+    onComplete: () => {
+      console.log('Title typewriter completed');
+      setShowSummary(true);
+    }
   });
+  
+  console.log('Title typewriter state:', titleTypewriter);
   
   const summaryTypewriter = useTypewriter({ 
     text: summary, 

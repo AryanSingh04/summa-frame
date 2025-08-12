@@ -18,6 +18,8 @@ export const useTypewriter = ({
   const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
+    console.log('useTypewriter effect triggered:', { text, speed, delay });
+    
     if (!text) {
       setDisplayText('');
       setIsComplete(false);
@@ -30,6 +32,7 @@ export const useTypewriter = ({
     setIsStarted(false);
 
     const startTimeout = setTimeout(() => {
+      console.log('Starting typewriter for:', text);
       setIsStarted(true);
       let currentIndex = 0;
 
