@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { VideoUpload } from '@/components/VideoUpload';
 import { VideoPlayer } from '@/components/VideoPlayer';
@@ -10,6 +11,7 @@ import heroImage from '@/assets/hero-video-ai.jpg';
 
 const Index = () => {
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+  const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [results, setResults] = useState<{
     title: string;
@@ -18,6 +20,7 @@ const Index = () => {
 
   const handleVideoSelect = async (file: File) => {
     setSelectedVideo(file);
+    setYoutubeUrl(null);
     setIsProcessing(true);
     setResults(null);
 
@@ -39,16 +42,41 @@ The video demonstrates the practical implementation of these technologies and th
     }, 3000);
   };
 
+  const handleYoutubeSubmit = async (url: string) => {
+    setYoutubeUrl(url);
+    setSelectedVideo(null);
+    setIsProcessing(true);
+    setResults(null);
+
+    // Simulate AI processing for YouTube video
+    setTimeout(() => {
+      setResults({
+        title: "AI-Powered Video Intelligence: YouTube Content Analysis Revolution",
+        summary: `This YouTube video demonstrates cutting-edge AI technology for automated video content analysis. The deep learning algorithms process visual and audio data to understand context, themes, and key information.
+
+Analysis highlights:
+• Multi-modal AI processing combining visual, audio, and text data
+• Real-time content categorization and topic identification
+• Automated highlight detection and key moment extraction
+• Cross-platform video intelligence capabilities
+
+The technology showcased represents the next generation of content understanding systems, enabling creators and platforms to automatically generate meaningful insights from video content at scale.`
+      });
+      setIsProcessing(false);
+    }, 3500);
+  };
+
   const handleRegenerate = () => {
-    if (!selectedVideo) return;
+    if (!selectedVideo && !youtubeUrl) return;
     
     setIsProcessing(true);
     
     // Simulate regeneration with different content
     setTimeout(() => {
       setResults({
-        title: "AI-Powered Video Intelligence: The Future of Content Analysis",
-        summary: `An in-depth exploration of cutting-edge video analysis technology powered by deep learning algorithms. This comprehensive overview demonstrates how artificial intelligence is reshaping our approach to video content understanding and automated summarization.
+        title: selectedVideo ? "Deep Learning Video Analysis: Advanced AI Content Processing" : "YouTube AI Analysis: Smart Content Understanding Technology",
+        summary: selectedVideo ? 
+          `An in-depth exploration of cutting-edge video analysis technology powered by deep learning algorithms. This comprehensive overview demonstrates how artificial intelligence is reshaping our approach to video content understanding and automated summarization.
 
 Featured technologies:
 • Convolutional Neural Networks for visual pattern recognition
@@ -56,7 +84,16 @@ Featured technologies:
 • Multi-modal learning combining visual and audio data
 • Attention mechanisms for identifying key moments
 
-The video provides insights into real-world applications including automated video editing, content moderation, accessibility features, and intelligent video search capabilities.`
+The video provides insights into real-world applications including automated video editing, content moderation, accessibility features, and intelligent video search capabilities.` :
+          `This YouTube content showcases advanced AI algorithms designed for comprehensive video analysis and understanding. The technology demonstrates sophisticated pattern recognition and content extraction capabilities.
+
+Key features:
+• Advanced neural network architectures for video processing
+• Semantic understanding of visual and contextual elements
+• Automated content summarization and key insight extraction
+• Platform-agnostic video intelligence solutions
+
+The demonstrated AI systems represent breakthrough capabilities in automated content analysis, offering unprecedented accuracy in video understanding and summary generation.`
       });
       setIsProcessing(false);
     }, 2500);
@@ -138,11 +175,31 @@ The video provides insights into real-world applications including automated vid
           <div className="space-y-6">
             <VideoUpload 
               onVideoSelect={handleVideoSelect}
+              onYoutubeSubmit={handleYoutubeSubmit}
               isProcessing={isProcessing}
             />
             
             {selectedVideo && (
               <VideoPlayer videoFile={selectedVideo} />
+            )}
+            
+            {youtubeUrl && (
+              <Card className="bg-gradient-card backdrop-blur-sm border-border/50">
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-red-500/10">
+                      <Sparkles className="h-5 w-5 text-red-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">YouTube Video Selected</h3>
+                      <p className="text-sm text-muted-foreground">AI will analyze the video content</p>
+                    </div>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm font-mono text-muted-foreground truncate">{youtubeUrl}</p>
+                  </div>
+                </div>
+              </Card>
             )}
           </div>
 
@@ -157,7 +214,7 @@ The video provides insights into real-world applications including automated vid
               />
             )}
             
-            {!selectedVideo && !isProcessing && (
+            {!selectedVideo && !youtubeUrl && !isProcessing && (
               <Card className="bg-gradient-card backdrop-blur-sm border-border/50">
                 <div className="p-8 text-center">
                   <Video className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
