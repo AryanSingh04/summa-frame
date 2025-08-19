@@ -184,22 +184,7 @@ The demonstrated AI systems represent breakthrough capabilities in automated con
             )}
             
             {youtubeUrl && (
-              <Card className="bg-gradient-card backdrop-blur-sm border-border/50">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-red-500/10">
-                      <Sparkles className="h-5 w-5 text-red-500" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">YouTube Video Selected</h3>
-                      <p className="text-sm text-muted-foreground">AI will analyze the video content</p>
-                    </div>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-sm font-mono text-muted-foreground truncate">{youtubeUrl}</p>
-                  </div>
-                </div>
-              </Card>
+              <VideoPlayer youtubeUrl={youtubeUrl} />
             )}
           </div>
 
