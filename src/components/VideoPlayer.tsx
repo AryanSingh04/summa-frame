@@ -10,9 +10,9 @@ interface VideoPlayerProps {
 export const VideoPlayer = ({ videoFile, youtubeUrl }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // Extract YouTube video ID from URL
+  // Extract YouTube video ID from URL (supports regular videos and shorts)
   const getYouTubeVideoId = (url: string) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
