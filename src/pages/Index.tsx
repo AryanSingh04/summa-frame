@@ -1,15 +1,19 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { VideoUpload } from '@/components/VideoUpload';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { AIResults } from '@/components/AIResults';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Video, Sparkles, Zap } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Brain, Video, Sparkles, Zap, User, LogOut } from 'lucide-react';
 import heroImage from '@/assets/hero-video-ai.jpg';
 
 const Index = () => {
+  const { user, session, loading, isDemoMode, signOut, exitDemoMode } = useAuth();
+  const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,6 +21,8 @@ const Index = () => {
     title: string;
     summary: string;
   } | null>(null);
+  
+  const isAuthenticated = !!user || isDemoMode;
 
   const handleVideoSelect = async (file: File) => {
     setSelectedVideo(file);
@@ -99,6 +105,44 @@ The demonstrated AI systems represent breakthrough capabilities in automated con
     }, 2500);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleExitDemo = () => {
+    exitDemoMode();
+    navigate('/auth');
+  };
+
+  // Redirect to auth if not authenticated and not loading
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/auth');
+    }
+  }, [loading, isAuthenticated, navigate]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-12 w-12 mx-auto text-primary mb-4 animate-pulse" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
@@ -114,10 +158,34 @@ The demonstrated AI systems represent breakthrough capabilities in automated con
             </div>
           </div>
           
-          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Powered by AI
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Powered by AI
+            </Badge>
+            
+            {isDemoMode ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExitDemo}
+                className="border-muted-foreground text-muted-foreground hover:bg-muted"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Exit Demo
+              </Button>
+            ) : user ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="border-muted-foreground text-muted-foreground hover:bg-muted"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : null}
+          </div>
         </div>
       </header>
 
