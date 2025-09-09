@@ -26,83 +26,78 @@ const Index = () => {
 
   const handleVideoSelect = async (file: File) => {
     setSelectedVideo(file);
-    setYoutubeUrl(null);
     setIsProcessing(true);
     setResults(null);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      setResults({
-        title: "Revolutionary AI Technology Breakthrough: Deep Learning Transforms Video Analysis",
-        summary: `This video showcases groundbreaking advances in artificial intelligence and deep learning technology. The content explores how neural networks are revolutionizing video analysis, enabling automated content understanding and intelligent summarization.
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
 
-Key highlights include:
-• Advanced computer vision algorithms that can identify objects, scenes, and actions
-• Natural language processing capabilities for generating human-like descriptions
-• Real-time video processing with unprecedented accuracy
-• Applications in content creation, education, and media analysis
-
-The video demonstrates the practical implementation of these technologies and their potential impact on various industries, from entertainment to scientific research.`
+      const response = await fetch('https://aryansingh04-summarizer.hf.space/transcribe', {
+        method: 'POST',
+        body: formData,
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error from backend:', errorData);
+        alert('Failed to process video: ' + (errorData.error || 'Unknown error'));
+        setIsProcessing(false);
+        return;
+      }
+
+      const data = await response.json();
+      setResults({ title: data.title, summary: data.summary });
+    } catch (err) {
+      console.error('Error sending video:', err);
+      alert('Failed to send video to backend.');
+    } finally {
       setIsProcessing(false);
-    }, 3000);
+    }
   };
 
   const handleYoutubeSubmit = async (url: string) => {
-    setYoutubeUrl(url);
-    setSelectedVideo(null);
-    setIsProcessing(true);
-    setResults(null);
+  setYoutubeUrl(url);
+  setSelectedVideo(null);
+  setIsProcessing(true);
+  setResults(null);
 
-    // Simulate AI processing for YouTube video
-    setTimeout(() => {
-      setResults({
-        title: "AI-Powered Video Intelligence: YouTube Content Analysis Revolution",
-        summary: `This YouTube video demonstrates cutting-edge AI technology for automated video content analysis. The deep learning algorithms process visual and audio data to understand context, themes, and key information.
+  try {
+    const response = await fetch("https://aryansingh04-summarizer.hf.space/transcribe-youtube", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
 
-Analysis highlights:
-• Multi-modal AI processing combining visual, audio, and text data
-• Real-time content categorization and topic identification
-• Automated highlight detection and key moment extraction
-• Cross-platform video intelligence capabilities
-
-The technology showcased represents the next generation of content understanding systems, enabling creators and platforms to automatically generate meaningful insights from video content at scale.`
-      });
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error from backend:", errorData);
+      alert("Failed to process YouTube video: " + (errorData.error || "Unknown error"));
       setIsProcessing(false);
-    }, 3500);
-  };
+      return;
+    }
+
+    const data = await response.json();
+    setResults({ title: data.title, summary: data.summary });
+  } catch (err) {
+    console.error("Error sending YouTube URL:", err);
+    alert("Failed to send YouTube URL to backend.");
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   const handleRegenerate = () => {
-    if (!selectedVideo && !youtubeUrl) return;
-    
+       if (!selectedVideo && !youtubeUrl) return;
     setIsProcessing(true);
+    // Simply resend the same video for regeneration
+    if(selectedVideo) await handleVideoSelect(selectedVideo);
+    if(youtubeUrl) await handleYoutubeSubmit(youtubeUrl);
     
     // Simulate regeneration with different content
-    setTimeout(() => {
-      setResults({
-        title: selectedVideo ? "Deep Learning Video Analysis: Advanced AI Content Processing" : "YouTube AI Analysis: Smart Content Understanding Technology",
-        summary: selectedVideo ? 
-          `An in-depth exploration of cutting-edge video analysis technology powered by deep learning algorithms. This comprehensive overview demonstrates how artificial intelligence is reshaping our approach to video content understanding and automated summarization.
-
-Featured technologies:
-• Convolutional Neural Networks for visual pattern recognition
-• Transformer architectures for sequence modeling
-• Multi-modal learning combining visual and audio data
-• Attention mechanisms for identifying key moments
-
-The video provides insights into real-world applications including automated video editing, content moderation, accessibility features, and intelligent video search capabilities.` :
-          `This YouTube content showcases advanced AI algorithms designed for comprehensive video analysis and understanding. The technology demonstrates sophisticated pattern recognition and content extraction capabilities.
-
-Key features:
-• Advanced neural network architectures for video processing
-• Semantic understanding of visual and contextual elements
-• Automated content summarization and key insight extraction
-• Platform-agnostic video intelligence solutions
-
-The demonstrated AI systems represent breakthrough capabilities in automated content analysis, offering unprecedented accuracy in video understanding and summary generation.`
-      });
-      setIsProcessing(false);
-    }, 2500);
+    
   };
 
   const handleSignOut = async () => {
