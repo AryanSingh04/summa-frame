@@ -89,7 +89,7 @@ const Index = () => {
   }
 };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = async() => {
        if (!selectedVideo && !youtubeUrl) return;
     setIsProcessing(true);
     // Simply resend the same video for regeneration
