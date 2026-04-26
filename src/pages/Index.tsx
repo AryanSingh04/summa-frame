@@ -33,7 +33,7 @@ const Index = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('https://aryansingh04-summarizer.hf.space/transcribe', {
+      const response = await fetch('https://AryanSingh04-video.hf.space/transcribe', {
         method: 'POST',
         body: formData,
       });
@@ -56,19 +56,15 @@ const Index = () => {
     }
   };
 
-  const handleYoutubeSubmit = async (url: string) => {
+   const handleYoutubeSubmit = async (url: string) => {
   setYoutubeUrl(url);
   setSelectedVideo(null);
   setIsProcessing(true);
   setResults(null);
 
   try {
-    const response = await fetch("https://aryansingh04-summarizer.hf.space/transcribe-youtube", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url }),
+    const response = await fetch(`http://127.0.0.1:8000/ytdl?url=${encodeURIComponent(url)}`, {
+      method: "GET",
     });
 
     if (!response.ok) {
@@ -80,6 +76,7 @@ const Index = () => {
     }
 
     const data = await response.json();
+    console.log("Received data:", data);
     setResults({ title: data.title, summary: data.summary });
   } catch (err) {
     console.error("Error sending YouTube URL:", err);
