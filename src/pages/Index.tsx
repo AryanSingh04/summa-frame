@@ -63,7 +63,7 @@ const Index = () => {
   setResults(null);
 
   try {
-    const response = await fetch(`http://127.0.0.1:8000/ytdl?url=${encodeURIComponent(url)}`, {
+    const response = await fetch(`https://AryanSingh04-video.hf.space/ytdl?url=${encodeURIComponent(url)}`, {
       method: "GET",
     });
 
